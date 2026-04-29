@@ -1,7 +1,7 @@
 <h1 align="center">Hi there 👋</h1>
 
 <p align="center">
-  <a href="https://www.linkedin.com/in/tim-harpe/" target="blank">
+  <a href="https://linkedin.com/in/tim-harpe" target="blank">
     <img src="https://img.shields.io/badge/-Tim%20Harpe-blue?style=for-the-badge&logo=Linkedin&logoColor=white&labelColor=blue&" />
   </a>
 </p>
