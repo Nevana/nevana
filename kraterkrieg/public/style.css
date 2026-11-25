@@ -167,3 +167,21 @@ body.touch .panel { max-width: calc(100vw - 28px); max-height: 70vh; overflow: a
   body.touch #weaponBar button { width: 38px; height: 38px; font-size: 19px; }
   body.touch #weaponInfo { bottom: 56px; }
 }
+
+/* Hochformat (Handy aufrecht): Waffenleiste voll breit über der Steuerung */
+@media (orientation: portrait) {
+  body.touch #gameButtons { flex-direction: column; right: calc(8px + env(safe-area-inset-right)); top: 118px; gap: 6px; }
+  body.touch #gameButtons button { width: 40px; height: 40px; }
+  body.touch .panel { right: auto; left: 10px; top: 118px; max-width: calc(100vw - 70px); }
+  .tc-left button { width: 56px; height: 56px; }
+  .tc-left { grid-template-columns: 56px 56px; gap: 6px; bottom: calc(8px + env(safe-area-inset-bottom)); }
+  .tc-left [data-k=up], .tc-left [data-k=down] { width: 56px; }
+  #touchControls button { height: 52px; }
+  .tc-right { bottom: calc(8px + env(safe-area-inset-bottom)); gap: 6px; grid-template-columns: 52px 52px; }
+  .tc-right .tc-fire { width: 110px; height: 66px; }
+  .tc-right [data-k=backflip], .tc-right [data-k=jump] { width: 52px; }
+  .tc-right #tcFuse { width: 110px; height: 40px; }
+  body.touch #weaponBar { left: 8px; right: 8px; transform: none; max-width: none; bottom: calc(196px + env(safe-area-inset-bottom)); justify-content: flex-start; }
+  body.touch #weaponBar button { width: 44px; height: 44px; font-size: 22px; }
+  body.touch #weaponInfo { bottom: calc(258px + env(safe-area-inset-bottom)); max-width: calc(100vw - 16px); }
+}

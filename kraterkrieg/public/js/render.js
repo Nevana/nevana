@@ -491,33 +491,36 @@ export class Renderer {
 
   drawHUD(ctx, view, ui, dt) {
     const W = this.vw;
+    const compact = W < 560;           // Hochformat / schmale Handys: zweizeilige Anzeige
+    const turnY = compact ? 10 + view.teams.length * 20 + 14 : 10;
     ctx.textBaseline = 'middle';
     // Zug-Info oben Mitte
     const t = view.teams[view.cur];
     const w = view.worms.find(o => o.id === view.curWorm);
     if (t && view.phase !== 'over') {
-      const bw = 260, bx = W / 2 - bw / 2;
+      const bw = compact ? Math.min(240, W - 120) : 260, bx = W / 2 - bw / 2, ty = turnY - 10;
       ctx.fillStyle = 'rgba(0,0,0,0.55)';
-      this.roundRect(ctx, bx, 10, bw, 46, 10); ctx.fill();
-      ctx.fillStyle = t.color; ctx.fillRect(bx + 10, 18, 6, 30);
+      this.roundRect(ctx, bx, ty + 10, bw, 46, 10); ctx.fill();
+      ctx.fillStyle = t.color; ctx.fillRect(bx + 10, ty + 18, 6, 30);
       ctx.textAlign = 'left'; ctx.font = 'bold 14px system-ui, sans-serif'; ctx.fillStyle = '#fff';
-      ctx.fillText(t.name + (t.ai ? ' 🤖' : ''), bx + 24, 26);
+      ctx.fillText(t.name + (t.ai ? ' 🤖' : ''), bx + 24, ty + 26);
       ctx.font = '12px system-ui, sans-serif'; ctx.fillStyle = '#ccc';
-      ctx.fillText(w ? w.name : '', bx + 24, 44);
+      ctx.fillText(w ? w.name : '', bx + 24, ty + 44);
       ctx.textAlign = 'right'; ctx.font = 'bold 26px system-ui, sans-serif';
       let tm = view.timer, col = view.timer <= 5 ? '#ff5252' : '#fff';
       if (view.phase === 'retreat') { tm = view.retreat; col = '#ffd54f'; }
       if (view.phase === 'settle') { tm = '…'; col = '#aaa'; }
-      ctx.fillStyle = col; ctx.fillText(String(tm), bx + bw - 14, 34);
+      ctx.fillStyle = col; ctx.fillText(String(tm), bx + bw - 14, ty + 34);
     }
 
     // Wind oben rechts
     {
-      const bx = W - 170, by = 14;
-      ctx.fillStyle = 'rgba(0,0,0,0.55)'; this.roundRect(ctx, bx, by, 156, 38, 8); ctx.fill();
+      const ww = compact ? Math.min(150, W - 230) : 156, bx = W - ww - 14, by = 14;
+      const bar = ww - 28, half = bar / 2;
+      ctx.fillStyle = 'rgba(0,0,0,0.55)'; this.roundRect(ctx, bx, by, ww, 38, 8); ctx.fill();
       ctx.textAlign = 'left'; ctx.font = '11px system-ui'; ctx.fillStyle = '#ddd'; ctx.fillText('Wind', bx + 8, by + 11);
-      const cx = bx + 78, len = view.wind * 64;
-      ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.fillRect(bx + 14, by + 22, 128, 8);
+      const cx = bx + ww / 2, len = view.wind * half;
+      ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.fillRect(bx + 14, by + 22, bar, 8);
       ctx.fillStyle = view.wind > 0 ? '#4fc3f7' : '#ff8a65';
       ctx.fillRect(Math.min(cx, cx + len), by + 22, Math.abs(len), 8);
       ctx.fillStyle = '#fff'; ctx.fillRect(cx - 0.5, by + 19, 1, 14);
@@ -543,19 +546,21 @@ export class Renderer {
     // Banner
     if (this.banner) {
       const b = this.banner;
+      const by = compact ? turnY + 76 : 96;
       b.life -= dt * 60;
       const a = Math.min(1, b.life / 25, (b.max - b.life) / 10 + 0.2);
       ctx.globalAlpha = Math.max(0, a);
       ctx.textAlign = 'center'; ctx.font = 'bold 26px system-ui, sans-serif';
       ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(0,0,0,0.8)';
-      ctx.strokeText(b.text, W / 2, 96); ctx.fillStyle = b.color; ctx.fillText(b.text, W / 2, 96);
+      ctx.strokeText(b.text, W / 2, by); ctx.fillStyle = b.color; ctx.fillText(b.text, W / 2, by);
       ctx.globalAlpha = 1;
       if (b.life <= 0) this.banner = null;
     }
     if (ui.myTurn && view.phase === 'aim' && !this.banner) {
       ctx.textAlign = 'center'; ctx.font = 'bold 15px system-ui'; ctx.fillStyle = '#fff';
       ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,0.7)';
-      ctx.strokeText('Du bist dran!', W / 2, 78); ctx.fillText('Du bist dran!', W / 2, 78);
+      const my = compact ? turnY + 76 : 78;
+      ctx.strokeText('Du bist dran!', W / 2, my); ctx.fillText('Du bist dran!', W / 2, my);
     }
     ctx.textBaseline = 'alphabetic';
   }
