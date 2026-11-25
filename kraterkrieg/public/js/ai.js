@@ -1,7 +1,7 @@
 // KI-Gegner: simuliert Schüsse mit der echten Physik und wählt den besten.
 // Schwierigkeit = Ungenauigkeit + Waffenauswahl.
 
-const WORM_R = 7;
+const R_WORM = 7;
 const DIFF = {
   easy: { aim: 0.13, power: 0.1, weapons: ['bazooka', 'grenade', 'shotgun'], pickTop: 4 },
   medium: { aim: 0.045, power: 0.035, weapons: ['bazooka', 'grenade', 'cluster', 'shotgun', 'bat', 'airstrike'], pickTop: 2 },
@@ -209,12 +209,12 @@ export class AIController {
   // Direkte Sichtlinie zu einem Gegner?
   rayHits(w, dx, dy, target) {
     const eng = this.eng;
-    let x = w.x + dx * (WORM_R + 1), y = w.y + dy * (WORM_R + 1);
+    let x = w.x + dx * (R_WORM + 1), y = w.y + dy * (R_WORM + 1);
     for (let i = 0; i < 1000; i++) {
       x += dx; y += dy;
       if (eng.terrain.solid(x, y)) return null;
       for (const o of eng.worms) {
-        if (o.alive && o !== w && (o.x - x) ** 2 + (o.y - y) ** 2 < WORM_R * WORM_R) return o;
+        if (o.alive && o !== w && (o.x - x) ** 2 + (o.y - y) ** 2 < R_WORM * R_WORM) return o;
       }
       if (y > eng.water || x < 0 || x > eng.terrain.w) return null;
     }

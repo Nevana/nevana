@@ -228,7 +228,7 @@ function cycleColor(t) {
 function copy(text) {
   (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject())
     .then(() => toast('Kopiert: ' + text))
-    .catch(() => window.prompt('Zum Kopieren:', text));
+    .catch(() => toast('Kopieren nicht möglich – bitte manuell markieren: ' + text, 6000));
 }
 
 $('btnAddAI').onclick = () => {
@@ -620,8 +620,14 @@ function updateWeaponBar(view) {
 $('btnHelp').onclick = e => { $('helpBox').classList.toggle('hidden'); e.currentTarget.blur(); };
 $('btnMute').onclick = e => { toggleMute(); e.currentTarget.blur(); };
 function toggleMute() { setMuted(!muted); $('btnMute').textContent = muted ? '🔇' : '🔊'; }
-$('btnQuit').onclick = () => {
-  if (!confirm(S.role === 'host' && S.net ? 'Spiel verlassen? Die Lobby wird für alle geschlossen.' : 'Spiel verlassen?')) return;
+let quitArmed = 0;
+$('btnQuit').onclick = e => {
+  e.currentTarget.blur();
+  if (performance.now() - quitArmed > 3000) {
+    quitArmed = performance.now();
+    toast(S.role === 'host' && S.net ? 'Nochmal klicken zum Verlassen – die Lobby wird für alle geschlossen.' : 'Nochmal klicken zum Verlassen.', 3000);
+    return;
+  }
   backToMenu();
 };
 $('btnBackLobby').onclick = () => {
