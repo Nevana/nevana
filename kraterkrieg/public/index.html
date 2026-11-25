@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Kraterkrieg</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💣</text></svg>">
   <link rel="stylesheet" href="style.css">
@@ -93,6 +93,20 @@
       <button id="btnMute" title="Ton (M)">🔊</button>
       <button id="btnQuit" title="Spiel verlassen">✕</button>
     </div>
+    <div id="touchControls">
+      <div class="tc-left">
+        <button data-k="up" class="tc-aim">▲</button>
+        <button data-k="left">◀</button>
+        <button data-k="right">▶</button>
+        <button data-k="down" class="tc-aim">▼</button>
+      </div>
+      <div class="tc-right">
+        <button id="tcFuse" class="tc-small hidden">⏱ 3s</button>
+        <button data-k="backflip" class="tc-small">⤒</button>
+        <button data-k="jump" class="tc-small">⤴</button>
+        <button data-k="fire" class="tc-fire">FEUER</button>
+      </div>
+    </div>
     <div id="helpBox" class="panel hidden">
       <h3>Steuerung</h3>
       <table>
@@ -104,6 +118,7 @@
         <tr><td>1 – 5</td><td>Zündzeit für Granaten</td></tr>
         <tr><td>Klick</td><td>Ziel wählen (Luftangriff, Teleporter, Lenkrakete)</td></tr>
         <tr><td>Maus ziehen / Rad</td><td>Kamera verschieben / zoomen</td></tr>
+        <tr><td>Touch</td><td>Tasten unten: Laufen/Zielen, Feuer halten = aufladen, ⤴ Sprung, ⤒ Salto; Tippen = Ziel, Wischen = Kamera, 2 Finger = Zoom</td></tr>
         <tr><td>Q / E</td><td>Vorherige / nächste Waffe</td></tr>
       </table>
       <p class="muted">Nach dem Schuss bleiben ein paar Sekunden zum Wegrennen.</p>

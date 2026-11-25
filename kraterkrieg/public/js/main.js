@@ -542,24 +542,46 @@ function cycleWeapon(dir) {
   }
 }
 
-// Maus: Ziehen = Kamera, Klick = Ziel, Rad = Zoom
+// Maus/Touch: Ziehen = Kamera, Klick/Tippen = Ziel, Rad/Pinch = Zoom
 const cv = $('cv');
-let drag = null;
+const ptrs = new Map();
+let drag = null, pinch = null;
 cv.addEventListener('pointerdown', e => {
   initAudio();
-  drag = { x: e.clientX, y: e.clientY, moved: 0 };
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
   cv.setPointerCapture(e.pointerId);
+  if (ptrs.size === 2) {
+    const [a, b] = [...ptrs.values()];
+    pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1 };
+    drag = null;
+  } else if (ptrs.size === 1) drag = { x: e.clientX, y: e.clientY, moved: 0 };
 });
 cv.addEventListener('pointermove', e => {
-  if (S.renderer) S.hover = S.renderer.screenToWorld(e.clientX, e.clientY);
+  if (e.pointerType === 'mouse' && S.renderer) S.hover = S.renderer.screenToWorld(e.clientX, e.clientY);
+  const p = ptrs.get(e.pointerId);
+  if (!p) return;
+  const px = p.x, py = p.y;
+  p.x = e.clientX; p.y = e.clientY;
+  if (pinch && ptrs.size >= 2) {
+    const [a, b] = [...ptrs.values()];
+    const d = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+    S.renderer.zoomAt(d / pinch.d, (a.x + b.x) / 2, (a.y + b.y) / 2);
+    S.renderer.pan((e.clientX - px) / 2, (e.clientY - py) / 2);
+    pinch.d = d;
+    return;
+  }
   if (!drag) return;
   const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
   drag.moved += Math.abs(dx) + Math.abs(dy);
   drag.x = e.clientX; drag.y = e.clientY;
-  if (drag.moved > 6) S.renderer.pan(dx, dy);
+  if (drag.moved > 10) S.renderer.pan(dx, dy);
 });
-cv.addEventListener('pointerup', e => {
-  if (drag && drag.moved <= 6 && e.button === 0) {
+function endPtr(e) {
+  const wasPinch = !!pinch;
+  ptrs.delete(e.pointerId);
+  if (ptrs.size < 2) pinch = null;
+  if (wasPinch) { drag = null; return; }
+  if (drag && drag.moved <= 10 && e.type === 'pointerup' && (e.button === 0 || e.pointerType !== 'mouse')) {
     // Die Engine prüft selbst, ob die aktuelle Waffe ein Ziel braucht
     if (isMyTurn(S.view)) {
       const p = S.renderer.screenToWorld(e.clientX, e.clientY);
@@ -567,12 +589,51 @@ cv.addEventListener('pointerup', e => {
     }
   }
   drag = null;
-});
+}
+cv.addEventListener('pointerup', endPtr);
+cv.addEventListener('pointercancel', endPtr);
 cv.addEventListener('wheel', e => {
   e.preventDefault();
   S.renderer.zoomAt(e.deltaY < 0 ? 1.12 : 1 / 1.12, e.clientX, e.clientY);
 }, { passive: false });
 cv.addEventListener('contextmenu', e => e.preventDefault());
+
+// Touch-Steuerung (Bildschirmtasten) – automatisch bei Touch-Geräten
+const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0 || matchMedia('(pointer: coarse)').matches;
+if (isTouch) {
+  document.body.classList.add('touch');
+  const held = new Map(); // pointerId -> Taste
+  const release = e => {
+    const k = held.get(e.pointerId);
+    if (!k) return;
+    held.delete(e.pointerId);
+    e.currentTarget.classList.remove('down');
+    sendInput(k, false);
+  };
+  for (const b of document.querySelectorAll('#touchControls [data-k]')) {
+    b.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      initAudio();
+      b.setPointerCapture(e.pointerId);
+      held.set(e.pointerId, b.dataset.k);
+      b.classList.add('down');
+      sendInput(b.dataset.k, true);
+      if (navigator.vibrate) navigator.vibrate(8);
+    });
+    b.addEventListener('pointerup', release);
+    b.addEventListener('pointercancel', release);
+    b.addEventListener('lostpointercapture', release);
+    b.addEventListener('contextmenu', e => e.preventDefault());
+  }
+  $('tcFuse').addEventListener('click', () => {
+    const v = S.view;
+    if (!isMyTurn(v)) return;
+    sendAction({ type: 'fuse', v: (v.fuse % 5) + 1 });
+  });
+  window.addEventListener('blur', () => { for (const k of held.values()) sendInput(k, false); held.clear(); });
+  document.addEventListener('gesturestart', e => e.preventDefault());
+  document.addEventListener('dblclick', e => e.preventDefault());
+}
 
 // ---------------- Waffenleiste ----------------
 function buildWeaponBar() {
@@ -597,6 +658,14 @@ function updateWeaponBar(view) {
   S.barSig = sig;
   const bar = $('weaponBar');
   bar.classList.toggle('inactive', !mine || view.phase !== 'aim');
+  const tc = $('touchControls');
+  if (tc) {
+    tc.classList.toggle('off', !mine);
+    const fb = $('tcFuse');
+    const wf = WEAPON_BY_ID[view.weapon];
+    fb.classList.toggle('hidden', !(wf && wf.fuse));
+    fb.textContent = `⏱ ${view.fuse} s`;
+  }
   for (const b of bar.children) {
     const id = b.dataset.id;
     const a = team ? team.ammo[id] : -1;
@@ -610,7 +679,7 @@ function updateWeaponBar(view) {
     let extra = '';
     if (wp.fuse) extra = ` · Zünder: <b>${view.fuse} s</b> (1–5)`;
     if (wp.id === 'shotgun' && view.shotsLeft > 0) extra = ' · <b>2. Schuss!</b>';
-    if (wp.target && !view.target && mine) extra = ' · <b>Ziel anklicken</b>';
+    if (wp.target && !view.target && mine) extra = isTouch ? ' · <b>Ziel antippen</b>' : ' · <b>Ziel anklicken</b>';
     info.innerHTML = `${wp.icon} <b>${wp.name}</b> – ${wp.help}${extra}`;
     info.classList.toggle('hidden', !mine);
   } else info.classList.add('hidden');
