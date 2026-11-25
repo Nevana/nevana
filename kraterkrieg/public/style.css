@@ -120,6 +120,10 @@ button.big { width: 100%; padding: 13px; font-size: 17px; margin-top: 8px; }
 .panel table { border-collapse: collapse; }
 .panel td { padding: 3px 8px 3px 0; vertical-align: top; }
 .panel td:first-child { color: var(--accent); white-space: nowrap; font-weight: 600; }
+#soundBox { min-width: 220px; }
+#soundBox .row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer; }
+#soundBox .field { margin-bottom: 10px; }
+#soundBox input[type=range] { width: 100%; accent-color: var(--accent); }
 #overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.45); padding: 16px; }
 #overlay .card { text-align: center; }
 #overlay h2 { font-size: 30px; }

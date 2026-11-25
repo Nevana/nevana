@@ -90,7 +90,8 @@
     <div id="weaponBar"></div>
     <div id="gameButtons">
       <button id="btnHelp" title="Steuerung (H)">?</button>
-      <button id="btnMute" title="Ton (M)">🔊</button>
+      <button id="btnMute" title="Effekte an/aus (M)">🔊</button>
+      <button id="btnMusic" title="Musik &amp; Lautstärke">🎵</button>
       <button id="btnQuit" title="Spiel verlassen">✕</button>
     </div>
     <div id="touchControls">
@@ -106,6 +107,12 @@
         <button data-k="jump" class="tc-small">⤴</button>
         <button data-k="fire" class="tc-fire">FEUER</button>
       </div>
+    </div>
+    <div id="soundBox" class="panel hidden">
+      <h3>Ton</h3>
+      <label class="row"><input type="checkbox" id="musicOn" checked> Hintergrundmusik</label>
+      <label class="field">Musik-Lautstärke <input type="range" id="musicVol" min="0" max="100" value="40"></label>
+      <label class="field">Effekt-Lautstärke <input type="range" id="sfxVol" min="0" max="100" value="35"></label>
     </div>
     <div id="helpBox" class="panel hidden">
       <h3>Steuerung</h3>

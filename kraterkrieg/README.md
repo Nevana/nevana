@@ -40,7 +40,7 @@ Node-Hoster wie Render, Railway oder Fly.io.
 | Klick | Ziel wählen (Luftangriff, Teleporter, Lenkrakete) |
 | Q / E | Waffe wechseln |
 | Maus ziehen / Mausrad | Kamera / Zoom |
-| H / M | Hilfe / Ton |
+| H / M / N | Hilfe / Effekte an-aus / Musik an-aus (🎵-Button: Lautstärke) |
 
 ## Waffen
 

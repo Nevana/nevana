@@ -3,7 +3,7 @@ import { Engine, WEAPONS, WEAPON_BY_ID } from './engine.js';
 import { Terrain, MAP_W, MAP_H, MAP_TYPES } from './terrain.js';
 import { Renderer } from './render.js';
 import { Net } from './net.js';
-import { initAudio, play, setMuted, muted } from './audio.js';
+import { initAudio, play, setMuted, muted, setMusicWanted, setMusicEnabled, setMusicVolume, setSfxVolume } from './audio.js';
 
 const $ = id => document.getElementById(id);
 const COLORS = ['#e53935', '#1e88e5', '#43a047', '#fdd835', '#8e24aa', '#00acc1'];
@@ -39,6 +39,7 @@ const store = {
 function show(screen) {
   for (const s of ['menu', 'lobby', 'game']) $(s).classList.toggle('hidden', s !== screen);
   S.screen = screen;
+  setMusicWanted(screen === 'game');   // Musik nur im Spiel
 }
 let toastTimer = null;
 function toast(text, ms = 2600) {
@@ -522,6 +523,7 @@ window.addEventListener('keydown', e => {
   const key = e.key.toLowerCase();
   if (key === 'q' || key === 'e') cycleWeapon(key === 'e' ? 1 : -1);
   else if (key === 'h') $('helpBox').classList.toggle('hidden');
+  else if (key === 'n') $('musicOn').click();
   else if (key === 'm') toggleMute();
 });
 window.addEventListener('keyup', e => {
@@ -686,7 +688,18 @@ function updateWeaponBar(view) {
 }
 
 // ---------------- Spielbuttons ----------------
-$('btnHelp').onclick = e => { $('helpBox').classList.toggle('hidden'); e.currentTarget.blur(); };
+$('btnHelp').onclick = e => { $('soundBox').classList.add('hidden'); $('helpBox').classList.toggle('hidden'); e.currentTarget.blur(); };
+$('btnMusic').onclick = e => { $('helpBox').classList.add('hidden'); $('soundBox').classList.toggle('hidden'); e.currentTarget.blur(); };
+{ // Ton-Einstellungen laden/speichern
+  const num = (k, d) => { const v = parseFloat(store.get(k)); return Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : d; };
+  const on = store.get('kk-music') !== '0', mv = num('kk-musicVol', 0.4), sv = num('kk-sfxVol', 0.35);
+  $('musicOn').checked = on; $('musicVol').value = Math.round(mv * 100); $('sfxVol').value = Math.round(sv * 100);
+  setMusicEnabled(on); setMusicVolume(mv); setSfxVolume(sv);
+  $('musicOn').onchange = e => { setMusicEnabled(e.target.checked); store.set('kk-music', e.target.checked ? '1' : '0'); };
+  $('musicVol').oninput = e => { const v = e.target.value / 100; setMusicVolume(v); store.set('kk-musicVol', v); };
+  $('sfxVol').oninput = e => { const v = e.target.value / 100; setSfxVolume(v); store.set('kk-sfxVol', v); };
+  $('sfxVol').onchange = () => play('boom', 20);   // Hörprobe
+}
 $('btnMute').onclick = e => { toggleMute(); e.currentTarget.blur(); };
 function toggleMute() { setMuted(!muted); $('btnMute').textContent = muted ? '🔇' : '🔊'; }
 let quitArmed = 0;
