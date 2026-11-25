@@ -1,0 +1,16 @@
+{
+  "name": "kraterkrieg",
+  "version": "1.0.0",
+  "description": "Rundenbasiertes Artillery-Browserspiel mit KI-Gegnern und Online-Lobby",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
